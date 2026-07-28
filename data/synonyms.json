@@ -1,0 +1,93 @@
+{
+  "slots": {
+    "birthplace": [
+      "birthplace",
+      "place of birth",
+      "city of birth",
+      "birth city",
+      "natal city"
+    ],
+    "residence": [
+      "residence",
+      "current residence",
+      "place of residence",
+      "city of residence",
+      "home city"
+    ],
+    "birth_date": [
+      "date of birth",
+      "birth date",
+      "full birth date",
+      "recorded birth date",
+      "date on which they were born"
+    ],
+    "profession": [
+      "profession",
+      "occupation",
+      "job",
+      "line of work",
+      "professional role",
+      "career",
+      "field of work",
+      "job title"
+    ]
+  },
+  "contextual_substitutions": {
+    "request_verbs": [
+      "name",
+      "identify",
+      "state",
+      "give",
+      "provide",
+      "specify"
+    ],
+    "born_in_city_predicates": [
+      "was born in",
+      "came into the world in"
+    ],
+    "lives_in_city_predicates": [
+      "lives in",
+      "currently lives in",
+      "resides in",
+      "currently resides in",
+      "makes their home in",
+      "calls home"
+    ],
+    "born_in_date_predicates": [
+      "was born on",
+      "came into the world on",
+      "has a birth date of",
+      "has a recorded date of birth of"
+    ],
+    "profession_predicates": [
+      "works as",
+      "is employed as",
+      "has a job as",
+      "earns a living as",
+      "has a career as"
+    ],
+    "city_question_phrases": [
+      "what city",
+      "which city",
+      "what town",
+      "which town",
+      "what location",
+      "which location"
+    ],
+    "date_question_phrases": [
+      "what date",
+      "which date",
+      "what calendar date",
+      "which calendar day",
+      "when"
+    ],
+    "profession_question_phrases": [
+      "what profession",
+      "which occupation",
+      "what job",
+      "which professional role",
+      "what line of work",
+      "what career"
+    ]
+  }
+}

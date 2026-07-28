@@ -1,0 +1,80 @@
+engineer
+doctor
+nurse
+teacher
+lawyer
+accountant
+architect
+pharmacist
+dentist
+veterinarian
+scientist
+chemist
+physicist
+biologist
+geologist
+astronomer
+mathematician
+statistician
+economist
+psychologist
+therapist
+paramedic
+surgeon
+radiologist
+electrician
+plumber
+carpenter
+welder
+mechanic
+machinist
+pilot
+flight attendant
+air traffic controller
+train conductor
+bus driver
+taxi driver
+farmer
+gardener
+landscaper
+chef
+baker
+butcher
+waiter
+bartender
+barista
+librarian
+journalist
+editor
+translator
+interpreter
+photographer
+designer
+illustrator
+animator
+actor
+musician
+singer
+dancer
+producer
+director
+programmer
+data analyst
+systems administrator
+cybersecurity analyst
+product manager
+project manager
+salesperson
+recruiter
+human resources manager
+social worker
+police officer
+firefighter
+detective
+security guard
+judge
+prosecutor
+real estate agent
+insurance agent
+postal worker
+hairdresser
