@@ -1,6 +1,6 @@
 # Research Charter: Does SFT Learn Facts or Retrieval Forms?
 
-**Status:** Initial project definition  
+**Status:** Initial project definition
 **Scope of this document:** Research objective, conceptual framework, micro-world design, and data/evaluation requirements. Training recipes, model selection, hyperparameters, experiment schedules, infrastructure, and run tracking are intentionally deferred.
 
 ## 1. Project Objective
