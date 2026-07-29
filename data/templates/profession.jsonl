@@ -1,16 +1,8 @@
-{"syntax_id":"wh_object_do_support","template":"What profession does {person} have?"}
-{"syntax_id":"wh_predicative_as_fronted","template":"What does {person} work as?"}
-{"syntax_id":"wh_np_preposition_stranding","template":"Which profession does {person} work in?"}
-{"syntax_id":"wh_np_pied_piping","template":"In which profession does {person} work?"}
-{"syntax_id":"echo_wh_in_situ","template":"{person} works in which profession?"}
-{"syntax_id":"possessive_np_copular","template":"What is {person}'s profession?"}
-{"syntax_id":"of_genitive_np_copular","template":"What is the profession of {person}?"}
-{"syntax_id":"relative_clause_np_copular","template":"What is the profession in which {person} works?"}
-{"syntax_id":"cleft_interrogative","template":"Which profession is it that {person} works in?"}
-{"syntax_id":"imperative_relative_clause","template":"Name the profession in which {person} works."}
-{"syntax_id":"imperative_possessive_np","template":"Give {person}'s profession."}
-{"syntax_id":"embedded_wh_polar_matrix","template":"Can you say which profession {person} works in?"}
-{"syntax_id":"embedded_wh_imperative_matrix","template":"Tell me which profession {person} works in."}
-{"syntax_id":"declarative_echo_relative_clause","template":"The profession in which {person} works is which profession?"}
-{"syntax_id":"topic_comment","template":"As for {person}, in which profession do they work?"}
-{"syntax_id":"nominal_fragment_question","template":"{person}'s profession: which one?"}
+{"operation_id":"GET_OCCUPATION","template_family_id":"direct_question","template_id":"occupation_direct_001","answer_format_id":"canonical_value","template":"What does {person} do for a living?"}
+{"operation_id":"GET_OCCUPATION","template_family_id":"direct_question","template_id":"occupation_direct_002","answer_format_id":"canonical_value","template":"What does {person} work as?"}
+{"operation_id":"GET_OCCUPATION","template_family_id":"nominal_attribute","template_id":"occupation_nominal_001","answer_format_id":"canonical_value","template":"What is {person}'s occupation?"}
+{"operation_id":"GET_OCCUPATION","template_family_id":"nominal_attribute","template_id":"occupation_nominal_002","answer_format_id":"canonical_value","template":"Which profession is listed for {person}?"}
+{"operation_id":"GET_OCCUPATION","template_family_id":"imperative","template_id":"occupation_imperative_001","answer_format_id":"canonical_value","template":"Name {person}'s profession."}
+{"operation_id":"GET_OCCUPATION","template_family_id":"imperative","template_id":"occupation_imperative_002","answer_format_id":"canonical_value","template":"Identify {person}'s occupation."}
+{"operation_id":"GET_OCCUPATION","template_family_id":"profile_field","template_id":"occupation_field_001","answer_format_id":"canonical_value","template":"Fill the blank with the value only: {person} — Occupation: ____."}
+{"operation_id":"GET_OCCUPATION","template_family_id":"profile_field","template_id":"occupation_field_002","answer_format_id":"canonical_value","template":"Supply only the missing value: Occupation for {person}: ____."}

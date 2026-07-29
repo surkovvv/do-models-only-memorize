@@ -1,16 +1,8 @@
-{"syntax_id":"wh_adverb_fronted","template":"Where was {person} born?"}
-{"syntax_id":"wh_np_pied_piping","template":"In which city was {person} born?"}
-{"syntax_id":"wh_np_preposition_stranding","template":"Which city was {person} born in?"}
-{"syntax_id":"echo_wh_in_situ","template":"{person} was born in which city?"}
-{"syntax_id":"possessive_np_copular","template":"What is {person}'s city of birth?"}
-{"syntax_id":"of_genitive_np_copular","template":"What is the city of {person}'s birth?"}
-{"syntax_id":"relative_clause_np_copular","template":"What is the city where {person} was born?"}
-{"syntax_id":"cleft_interrogative","template":"Which city was it that {person} was born in?"}
-{"syntax_id":"imperative_relative_clause","template":"Name the city where {person} was born."}
-{"syntax_id":"imperative_possessive_np","template":"Give {person}'s city of birth."}
-{"syntax_id":"embedded_wh_polar_matrix","template":"Can you say which city {person} was born in?"}
-{"syntax_id":"embedded_wh_imperative_matrix","template":"Tell me which city {person} was born in."}
-{"syntax_id":"declarative_echo_relative_clause","template":"The city where {person} was born is which city?"}
-{"syntax_id":"topic_comment","template":"As for {person}, in which city were they born?"}
-{"syntax_id":"nominal_fragment_question","template":"{person}'s city of birth: which city?"}
-{"syntax_id":"modal_passive_answer_request","template":"Which city should be given as {person}'s city of birth?"}
+{"operation_id":"GET_BIRTH_CITY","template_family_id":"direct_question","template_id":"birth_city_direct_001","answer_format_id":"canonical_value","template":"In which city was {person} born?"}
+{"operation_id":"GET_BIRTH_CITY","template_family_id":"direct_question","template_id":"birth_city_direct_002","answer_format_id":"canonical_value","template":"What city was {person} born in?"}
+{"operation_id":"GET_BIRTH_CITY","template_family_id":"nominal_attribute","template_id":"birth_city_nominal_001","answer_format_id":"canonical_value","template":"What is {person}'s city of birth?"}
+{"operation_id":"GET_BIRTH_CITY","template_family_id":"nominal_attribute","template_id":"birth_city_nominal_002","answer_format_id":"canonical_value","template":"Which city is listed as {person}'s birthplace?"}
+{"operation_id":"GET_BIRTH_CITY","template_family_id":"imperative","template_id":"birth_city_imperative_001","answer_format_id":"canonical_value","template":"Name the city where {person} came into the world."}
+{"operation_id":"GET_BIRTH_CITY","template_family_id":"imperative","template_id":"birth_city_imperative_002","answer_format_id":"canonical_value","template":"Identify the city in which {person} was born."}
+{"operation_id":"GET_BIRTH_CITY","template_family_id":"profile_field","template_id":"birth_city_field_001","answer_format_id":"canonical_value","template":"Fill the blank with the value only: {person} — City of birth: ____."}
+{"operation_id":"GET_BIRTH_CITY","template_family_id":"profile_field","template_id":"birth_city_field_002","answer_format_id":"canonical_value","template":"Supply only the missing value: City of birth for {person}: ____."}
