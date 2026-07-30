@@ -1,16 +1,7 @@
-{"syntax_id":"wh_adverb_fronted","template":"When was {person} born?"}
-{"syntax_id":"wh_np_pied_piping","template":"On which date was {person} born?"}
-{"syntax_id":"wh_np_preposition_stranding","template":"Which date was {person} born on?"}
-{"syntax_id":"echo_wh_in_situ","template":"{person} was born on which date?"}
-{"syntax_id":"possessive_np_copular","template":"What is {person}'s date of birth?"}
-{"syntax_id":"of_genitive_np_copular","template":"What is the date of {person}'s birth?"}
-{"syntax_id":"relative_clause_np_copular","template":"What is the date on which {person} was born?"}
-{"syntax_id":"cleft_interrogative","template":"Which date was it that {person} was born on?"}
-{"syntax_id":"imperative_relative_clause","template":"Name the date on which {person} was born."}
-{"syntax_id":"imperative_possessive_np","template":"Give {person}'s date of birth."}
-{"syntax_id":"embedded_wh_polar_matrix","template":"Can you say which date {person} was born on?"}
-{"syntax_id":"embedded_wh_imperative_matrix","template":"Tell me which date {person} was born on."}
-{"syntax_id":"declarative_echo_relative_clause","template":"The date on which {person} was born is which date?"}
-{"syntax_id":"topic_comment","template":"As for {person}, on which date were they born?"}
-{"syntax_id":"nominal_fragment_question","template":"{person}'s date of birth: which date?"}
-{"syntax_id":"modal_passive_answer_request","template":"Which date should be given as {person}'s date of birth?"}
+{"operation_id":"GET_BIRTH_DATE","template_family_id":"direct_question","template_id":"birth_date_direct_001","answer_format_id":"canonical_value","template":"On what date was {person} born?"}
+{"operation_id":"GET_BIRTH_DATE","template_family_id":"direct_question","template_id":"birth_date_direct_002","answer_format_id":"canonical_value","template":"What date was {person} born on?"}
+{"operation_id":"GET_BIRTH_DATE","template_family_id":"nominal_attribute","template_id":"birth_date_nominal_001","answer_format_id":"canonical_value","template":"What is {person}'s date of birth?"}
+{"operation_id":"GET_BIRTH_DATE","template_family_id":"nominal_attribute","template_id":"birth_date_nominal_002","answer_format_id":"canonical_value","template":"Which date is listed as {person}'s birth date?"}
+{"operation_id":"GET_BIRTH_DATE","template_family_id":"imperative","template_id":"birth_date_imperative_001","answer_format_id":"canonical_value","template":"State the date when {person} came into the world."}
+{"operation_id":"GET_BIRTH_DATE","template_family_id":"imperative","template_id":"birth_date_imperative_002","answer_format_id":"canonical_value","template":"Give the date on which {person} was born."}
+{"operation_id":"GET_BIRTH_DATE","template_family_id":"profile_field","template_id":"birth_date_field_001","answer_format_id":"canonical_value","template":"Fill the blank with the value only: {person} — Date of birth: ____."}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "hypothesis": "H1",
+  "split_unit": "template_family_id",
+  "train_family_ids": [
+    "direct_question",
+    "imperative",
+    "profile_field"
+  ],
+  "test_family_ids": [
+    "nominal_attribute"
+  ]
+}

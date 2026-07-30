@@ -1,16 +1,6 @@
-{"syntax_id":"wh_adverb_fronted","template":"Where does {person} live?"}
-{"syntax_id":"wh_np_pied_piping","template":"In which city does {person} live?"}
-{"syntax_id":"wh_np_preposition_stranding","template":"Which city does {person} live in?"}
-{"syntax_id":"echo_wh_in_situ","template":"{person} lives in which city?"}
-{"syntax_id":"possessive_np_copular","template":"What is {person}'s city of residence?"}
-{"syntax_id":"of_genitive_np_copular","template":"What is the city of {person}'s residence?"}
-{"syntax_id":"relative_clause_np_copular","template":"What is the city where {person} lives?"}
-{"syntax_id":"cleft_interrogative","template":"Which city is it that {person} lives in?"}
-{"syntax_id":"imperative_relative_clause","template":"Name the city where {person} lives."}
-{"syntax_id":"imperative_possessive_np","template":"Give {person}'s city of residence."}
-{"syntax_id":"embedded_wh_polar_matrix","template":"Can you say which city {person} lives in?"}
-{"syntax_id":"embedded_wh_imperative_matrix","template":"Tell me which city {person} lives in."}
-{"syntax_id":"declarative_echo_relative_clause","template":"The city where {person} lives is which city?"}
-{"syntax_id":"topic_comment","template":"As for {person}, in which city do they live?"}
-{"syntax_id":"nominal_fragment_question","template":"{person}'s city of residence: which city?"}
-{"syntax_id":"modal_passive_answer_request","template":"Which city should be given as {person}'s city of residence?"}
+{"operation_id":"GET_RESIDENCE_CITY","template_family_id":"direct_question","template_id":"residence_city_direct_001","answer_format_id":"canonical_value","template":"In which city does {person} currently live?"}
+{"operation_id":"GET_RESIDENCE_CITY","template_family_id":"direct_question","template_id":"residence_city_direct_002","answer_format_id":"canonical_value","template":"What city does {person} live in now?"}
+{"operation_id":"GET_RESIDENCE_CITY","template_family_id":"nominal_attribute","template_id":"residence_city_nominal_001","answer_format_id":"canonical_value","template":"What is {person}'s city of residence?"}
+{"operation_id":"GET_RESIDENCE_CITY","template_family_id":"nominal_attribute","template_id":"residence_city_nominal_002","answer_format_id":"canonical_value","template":"Which city is listed as {person}'s current residence?"}
+{"operation_id":"GET_RESIDENCE_CITY","template_family_id":"imperative","template_id":"residence_city_imperative_001","answer_format_id":"canonical_value","template":"Identify the city where {person} now resides."}
+{"operation_id":"GET_RESIDENCE_CITY","template_family_id":"profile_field","template_id":"residence_city_field_001","answer_format_id":"canonical_value","template":"Supply only the missing value: City of residence for {person}: ____."}
