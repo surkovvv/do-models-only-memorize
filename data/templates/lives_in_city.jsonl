@@ -3,6 +3,4 @@
 {"operation_id":"GET_RESIDENCE_CITY","template_family_id":"nominal_attribute","template_id":"residence_city_nominal_001","answer_format_id":"canonical_value","template":"What is {person}'s city of residence?"}
 {"operation_id":"GET_RESIDENCE_CITY","template_family_id":"nominal_attribute","template_id":"residence_city_nominal_002","answer_format_id":"canonical_value","template":"Which city is listed as {person}'s current residence?"}
 {"operation_id":"GET_RESIDENCE_CITY","template_family_id":"imperative","template_id":"residence_city_imperative_001","answer_format_id":"canonical_value","template":"Identify the city where {person} now resides."}
-{"operation_id":"GET_RESIDENCE_CITY","template_family_id":"imperative","template_id":"residence_city_imperative_002","answer_format_id":"canonical_value","template":"Name the city in which {person} currently lives."}
-{"operation_id":"GET_RESIDENCE_CITY","template_family_id":"profile_field","template_id":"residence_city_field_001","answer_format_id":"canonical_value","template":"Fill the blank with the value only: {person} — City of residence: ____."}
-{"operation_id":"GET_RESIDENCE_CITY","template_family_id":"profile_field","template_id":"residence_city_field_002","answer_format_id":"canonical_value","template":"Supply only the missing value: City of residence for {person}: ____."}
+{"operation_id":"GET_RESIDENCE_CITY","template_family_id":"profile_field","template_id":"residence_city_field_001","answer_format_id":"canonical_value","template":"Supply only the missing value: City of residence for {person}: ____."}

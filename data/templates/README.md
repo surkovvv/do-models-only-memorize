@@ -21,8 +21,9 @@ it changes an interpretable linguistic or presentation property.
 
 Use these curation rules:
 
-- keep two individual templates per family so seen-family evaluation need not
-  reuse the exact SFT string;
+- prefer two individual templates per family; one is sufficient for the
+  initial H1 family-level holdout, while a future seen-family/new-template
+  evaluation requires two;
 - keep at most one family for a syntactic, lexical, discourse, or presentation
   construction;
 - reject pairs that differ only by preposition placement, possessive/genitive
@@ -121,3 +122,26 @@ against the research charter.
 This validator checks the registry only. Once generated split files exist, a
 separate split validator must enforce global family holdout and the three
 evaluation-slice contracts defined in the research charter.
+
+## Initial H1 split
+
+The first H1 experiment uses the family assignment in
+`data/splits/h1_template_families.json`. `nominal_attribute` is held out
+globally for test. `direct_question`, `imperative`, and `profile_field` are
+assigned to train.
+
+The manifest is the source of truth: downstream dataset generation filters the
+registry by its family lists rather than maintaining copied train and test
+template files. Validate it with:
+
+```bash
+python3 scripts/validate_h1_split.py
+```
+
+The validator asserts that:
+
+- train and test family IDs are disjoint;
+- every registry family is assigned exactly once;
+- every template is covered by the split;
+- the per-operation counts are 4/1 for five templates, 4/2 for six templates,
+  and 5/2 for seven templates.

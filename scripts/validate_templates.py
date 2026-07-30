@@ -33,7 +33,8 @@ EXPECTED_FAMILIES = {
     "imperative",
     "profile_field",
 }
-EXPECTED_TEMPLATES_PER_FAMILY = 2
+MIN_TEMPLATES_PER_FAMILY = 1
+MAX_TEMPLATES_PER_FAMILY = 2
 EXPECTED_ANSWER_FORMAT = "canonical_value"
 SEQUENCE_SIMILARITY_LIMIT = 0.88
 COMBINED_SEQUENCE_FLOOR = 0.65
@@ -153,10 +154,11 @@ def validate_file(path: Path, expected_operation: str) -> tuple[list[str], list[
         )
     for family_id in EXPECTED_FAMILIES:
         count = family_counts.get(family_id, 0)
-        if count != EXPECTED_TEMPLATES_PER_FAMILY:
+        if not MIN_TEMPLATES_PER_FAMILY <= count <= MAX_TEMPLATES_PER_FAMILY:
             errors.append(
-                f"{path.name}: family {family_id!r} must contain exactly "
-                f"{EXPECTED_TEMPLATES_PER_FAMILY} templates, found {count}"
+                f"{path.name}: family {family_id!r} must contain between "
+                f"{MIN_TEMPLATES_PER_FAMILY} and {MAX_TEMPLATES_PER_FAMILY} "
+                f"templates, found {count}"
             )
 
     for (left_family, left_id, left), (right_family, right_id, right) in combinations(

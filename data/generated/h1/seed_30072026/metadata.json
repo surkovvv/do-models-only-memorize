@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "dataset_id": "h1_world_4048c2780968",
+  "hypothesis": "H1",
+  "world_id": "world_4048c2780968",
+  "world_seed": "30072026",
+  "people_count": 500,
+  "fact_count": 2000,
+  "train_family_ids": [
+    "direct_question",
+    "imperative",
+    "profile_field"
+  ],
+  "test_family_ids": [
+    "nominal_attribute"
+  ],
+  "counts": {
+    "train": 9000,
+    "test": 4000,
+    "total": 13000
+  },
+  "counts_by_operation": {
+    "train": {
+      "GET_BIRTH_CITY": 2500,
+      "GET_BIRTH_DATE": 2500,
+      "GET_OCCUPATION": 2000,
+      "GET_RESIDENCE_CITY": 2000
+    },
+    "test": {
+      "GET_BIRTH_CITY": 1000,
+      "GET_BIRTH_DATE": 1000,
+      "GET_OCCUPATION": 1000,
+      "GET_RESIDENCE_CITY": 1000
+    }
+  },
+  "input_sha256": {
+    "data/strange_names.txt": "acdb454a11897234d3671352ff93e36c03fcb2e89ea8a4170e92ba4437d7f36e",
+    "data/dates.txt": "b3fc78f82d8f9f93e42a6884632934125bdc576ddbb46d26ade618f11c1e1a61",
+    "data/professions.txt": "5c6ae53cdb79fe0285cf889ce92a7460342eba0f02a5848baa7a724c5b777294",
+    "data/towns.txt": "bef0d153e3b30c37fc1ed5b1ca99331386fef0b97207f101cf26150cd39451a0",
+    "data/templates/born_in_city.jsonl": "d11bda9a48a2d4d0b32d4eaec6004556fa6f9ebaad5d490c5635ead1914dfc81",
+    "data/templates/born_in_date.jsonl": "2a019faf80a6066e97f9b0f9764d68da4a96a03cdeb3752dcef7088d8c30f75f",
+    "data/templates/lives_in_city.jsonl": "cea1eb36c5088eb6e27f7af678ac8c5406f171116814b0a4367100ce899fc5db",
+    "data/templates/profession.jsonl": "e527b3bd3376e3372a1f693ee6dbcd8b8c1fd12547c3868da4c415361142902e",
+    "data/splits/h1_template_families.json": "fbcb81122944074bcc7e12321b90859e28892905722d760a1ff24fc3185abe94"
+  }
+}
