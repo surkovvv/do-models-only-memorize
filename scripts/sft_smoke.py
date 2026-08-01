@@ -6,6 +6,7 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer, AutoModelForCausalLM, Trainer, TrainingArguments
 
 import torch
+import torch.nn as nn
 import json
 
 
@@ -58,19 +59,17 @@ class SFTCollator:
             conversations,
             return_tensors="pt",
             padding=True,
-            truncation=True,
+            truncation=False,  # for smoke purpose ok
             return_dict=True,
         )
         labels = batch["input_ids"].clone()
 
-        # Padding не участвует в loss.
+        # Padding
         labels[batch["attention_mask"] == 0] = -100
 
-        # Qwen не возвращает корректную assistant mask для своего chat template,
-        # поэтому определяем границу ответа по длине prompt с assistant header.
         prompt_token_ids: list[list[int]] = self.tokenizer.apply_chat_template(
-            [conversation[:-1] for conversation in conversations],
-            add_generation_prompt=True,
+            [conversation[:-1] for conversation in conversations],  # without last assistant message
+            add_generation_prompt=True,  # adding <|assistant|> token before actual assistant answer
             tokenize=True,
         )
         for row, prompt_ids in enumerate(prompt_token_ids):
@@ -86,8 +85,33 @@ class SFTCollator:
         return batch
 
         
+# трейн шаг
+def train_step(
+    model: nn.Module,
+    batch: dict[str, torch.Tensor],
+    optimizer: torch.optim.Optimizer,
+    device: torch.device,
+):
+    """v0: stupid forward backward, no accumulation etc"""
+    model.train()
+    optimizer.zero_grad()
+    for k, v in batch.items():
+        batch[k] = v.to(device)
+
+    outputs = model(**batch)
+    loss = outputs.loss
+    loss.backward()
+    optimizer.step()
+
+    return loss
+
 
 # трейн луп
+def train():
+    for batch in dataloader:
+        train_step(model, batch, optimizer, device)
+    
+
 # эвал луп?
 
 # cli main - загрузка модели, установление всяких оптимизаторов, запуск обучения
