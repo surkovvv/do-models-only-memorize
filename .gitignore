@@ -17,6 +17,7 @@ clearml.conf
 
 # Local experiment output. Keep curated files under data/generated tracked.
 .cache/
+.models/
 artifacts/
 checkpoints/
 logs/
@@ -28,4 +29,3 @@ wandb/
 .DS_Store
 .idea/
 .vscode/
-
