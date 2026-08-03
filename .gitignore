@@ -1,0 +1,31 @@
+# Local Python environment and caches.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Notebook state.
+.ipynb_checkpoints/
+
+# Secrets and local configuration.
+.env
+clearml.conf
+
+# Local experiment output. Keep curated files under data/generated tracked.
+.cache/
+.models/
+artifacts/
+checkpoints/
+logs/
+outputs/
+runs/
+wandb/
+
+# OS/editor files.
+.DS_Store
+.idea/
+.vscode/

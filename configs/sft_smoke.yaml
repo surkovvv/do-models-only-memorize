@@ -1,0 +1,31 @@
+experiment_name: h1-sft-smoke
+
+data:
+  train_path: data/generated/h1/seed_30072026/train.jsonl
+
+model:
+  name_or_path: .models/Qwen3-0.6B
+  local_files_only: true
+
+training:
+  batch_size: 16
+  learning_rate: 2.0e-5
+  # Sample one reproducible random batch and repeat it. Use null for full epochs.
+  smoke_steps: 10
+  epochs: 1
+  # Also controls smoke-batch sampling; change it to select another fixed batch.
+  seed: 42
+
+runtime:
+  # "auto" selects CUDA, then MPS, then CPU. An explicit torch device also works.
+  device: auto
+  debug: false
+  # null logs the entire smoke batch after each step; use 1 for compact output.
+  prediction_log_limit: null
+
+tracking:
+  enabled: false
+  project_name: do-models-only-memorize
+  task_name: null  # Defaults to experiment_name.
+  output_uri: null
+  tags: [sft, smoke]
