@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from experiment_config import ExperimentConfig, config_from_mapping, load_experiment_config  # noqa: E402
+from dataset import EVALUATION_SPLITS  # noqa: E402
 
 if TYPE_CHECKING:
     from clearml import Logger, Task
@@ -91,6 +92,23 @@ def select_smoke_examples(
     return random.Random(seed).sample(examples, sample_size)
 
 
+def group_evaluation_examples(
+    examples: Sequence[Example],
+) -> dict[str, list[Example]]:
+    """Partition the combined evaluation file by its scientific slice."""
+
+    groups = {split: [] for split in EVALUATION_SPLITS}
+    unexpected_splits = sorted({example.split for example in examples} - set(groups))
+    if unexpected_splits:
+        raise ValueError(f"unexpected evaluation splits: {unexpected_splits}")
+    for example in examples:
+        groups[example.split].append(example)
+    empty_splits = [split for split, split_examples in groups.items() if not split_examples]
+    if empty_splits:
+        raise ValueError(f"empty evaluation splits: {empty_splits}")
+    return groups
+
+
 # датадоудер, как оказалось, не особо нужен. а вот колейтор(то, что собирает батч) - нужен
 class SFTCollator:
     def __init__(self, tokenizer: PreTrainedTokenizerBase):
@@ -114,7 +132,7 @@ class SFTCollator:
                 padding=True,
                 truncation=False,  # for smoke purpose ok
                 return_dict=True,
-                enable_thinking=False
+                enable_thinking=False,
             ),
         )
         labels = batch["input_ids"].clone()
@@ -130,7 +148,7 @@ class SFTCollator:
                 # adding <|assistant|> token before actual assistant answer
                 add_generation_prompt=True,
                 tokenize=True,
-                enable_thinking=False
+                enable_thinking=False,
             ),
         )
         for row, prompt_ids in enumerate(prompt_token_ids):
@@ -721,10 +739,7 @@ def run(config: ExperimentConfig, task: Task | None = None) -> TrainingResult:
         path_to_test_data = resolve_project_path(config.data.test_path)
         with path_to_test_data.open(encoding="utf-8") as f:
             test_data = [Example(**json.loads(line)) for line in f]
-        evaluation_splits = {
-            "train": data,
-            "test": test_data,
-        }
+        evaluation_splits = group_evaluation_examples(test_data)
 
     smoke_examples: list[Example] | None = None
     training_data = data

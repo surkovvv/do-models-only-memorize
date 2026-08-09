@@ -19,10 +19,10 @@ class H1SplitTests(unittest.TestCase):
         self.assertEqual([], errors)
         self.assertEqual(
             [
-                ("GET_BIRTH_CITY", 5, 2),
-                ("GET_BIRTH_DATE", 5, 2),
-                ("GET_RESIDENCE_CITY", 4, 2),
-                ("GET_OCCUPATION", 4, 2),
+                ("GET_BIRTH_CITY", 6, 2),
+                ("GET_BIRTH_DATE", 6, 2),
+                ("GET_RESIDENCE_CITY", 6, 2),
+                ("GET_OCCUPATION", 6, 2),
             ],
             [
                 (summary.operation_id, summary.train_count, summary.test_count)
@@ -49,6 +49,22 @@ class H1SplitTests(unittest.TestCase):
         _, errors = validate_h1_split(self.records, manifest)
         self.assertTrue(
             any("unassigned registry families" in error for error in errors)
+        )
+
+    def test_rejects_identical_sft_and_seen_eval_suffixes(self) -> None:
+        manifest = dict(self.manifest)
+        manifest["seen_family_eval_template_suffix"] = manifest[
+            "sft_template_suffix"
+        ]
+        _, errors = validate_h1_split(self.records, manifest)
+        self.assertTrue(any("suffixes must differ" in error for error in errors))
+
+    def test_rejects_non_positive_evaluation_people_count(self) -> None:
+        manifest = dict(self.manifest)
+        manifest["evaluation_people_count"] = 0
+        _, errors = validate_h1_split(self.records, manifest)
+        self.assertTrue(
+            any("evaluation_people_count must be" in error for error in errors)
         )
 
 

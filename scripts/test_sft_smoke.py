@@ -20,6 +20,7 @@ from scripts.sft_smoke import (  # noqa: E402
     TrainingResult,
     exact_match_accuracy,
     generate_answers_batched,
+    group_evaluation_examples,
     log_predictions,
     make_metric_logger,
     report_final_metrics,
@@ -29,7 +30,7 @@ from scripts.sft_smoke import (  # noqa: E402
 )
 
 
-def make_example(question: str, answer: str) -> Example:
+def make_example(question: str, answer: str, *, split: str = "train") -> Example:
     return Example(
         example_id="example",
         world_id="world",
@@ -45,11 +46,33 @@ def make_example(question: str, answer: str) -> Example:
         rendered_question=question,
         canonical_answer=answer,
         answer_format_id="format",
-        split="train",
+        split=split,
     )
 
 
 class SmokeTrainingTests(unittest.TestCase):
+    def test_groups_the_combined_test_file_by_scientific_slice(self) -> None:
+        examples = [
+            make_example(split, "answer", split=split)
+            for split in (
+                "eval_exact_recall",
+                "eval_seen_family_new_template",
+                "eval_heldout_family",
+            )
+        ]
+
+        groups = group_evaluation_examples(examples)
+
+        self.assertEqual(
+            [
+                "eval_exact_recall",
+                "eval_seen_family_new_template",
+                "eval_heldout_family",
+            ],
+            list(groups),
+        )
+        self.assertTrue(all(len(split_examples) == 1 for split_examples in groups.values()))
+
     def test_selects_a_reproducible_random_smoke_batch(self) -> None:
         examples = [make_example(f"q{index}", str(index)) for index in range(10)]
 
@@ -230,9 +253,7 @@ class SmokeTrainingTests(unittest.TestCase):
         )
 
         self.assertEqual(5, logger.report_scalar.call_count)
-        logger.report_scalar.assert_any_call(
-            title="loss", series="smoke", value=0.25, iteration=3
-        )
+        logger.report_scalar.assert_any_call(title="loss", series="smoke", value=0.25, iteration=3)
         logger.report_scalar.assert_any_call(
             title="accuracy", series="smoke/token", value=0.75, iteration=3
         )
@@ -271,9 +292,7 @@ class SmokeTrainingTests(unittest.TestCase):
 
         logger.report_single_value.assert_any_call(name="final/loss", value=0.1)
         logger.report_single_value.assert_any_call(name="final/token_accuracy", value=1.0)
-        logger.report_single_value.assert_any_call(
-            name="final/exact_match_accuracy", value=0.75
-        )
+        logger.report_single_value.assert_any_call(name="final/exact_match_accuracy", value=0.75)
 
     def test_rejects_an_empty_smoke_dataset(self) -> None:
         with self.assertRaisesRegex(ValueError, "empty dataset"):

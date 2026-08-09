@@ -1,19 +1,42 @@
-# H1 train/test dataset
+# H1 SFT/evaluation dataset
 
-This dataset tests whether retrieval of already learned facts transfers to a
-globally held-out template family.
+This dataset tests whether retrieval of already learned facts transfers first
+to a new wording inside a seen template family and then to a globally held-out
+template family.
 
 ## Controlled comparison
 
-Train and test contain the same people and the same 2,000 atomic facts. The
-only intended split axis is `template_family_id`:
+SFT and evaluation use facts from the same generated world. The family split
+is:
 
-- train: `direct_question`, `imperative`, `profile_field`;
-- test: `nominal_attribute`.
+- SFT families: `direct_question`, `imperative`, `profile_field`;
+- held-out family: `nominal_attribute`.
 
-Fact overlap is intentional for H1. A test fact absent from train would measure
+Within every SFT family and operation, the split manifest assigns `_001` to
+SFT and reserves `_002` globally for `eval_seen_family_new_template`. The
+suffixes are an explicit assignment for this run, not a permanent direction;
+later runs can swap them for counterbalancing.
+
+Fact overlap is intentional for H1. A test fact absent from SFT would measure
 generalization to a new fact or entity instead of retrieval through a new
 surface form.
+
+## Paired evaluation sample
+
+The manifest deterministically selects 250 complete people, or 1,000 atomic
+facts across the four operations. Each selected fact appears once in each
+evaluation slice:
+
+- `eval_exact_recall`: the same template ID used for that fact during SFT;
+- `eval_seen_family_new_template`: the reserved sibling template from the same
+  family;
+- `eval_heldout_family`: one of the two globally held-out
+  `nominal_attribute` templates.
+
+Seen SFT families and held-out template variants are balanced across facts.
+Both nominal templates are balanced within each operation. The remaining
+possible renderings are intentionally unused; generated rows do not need to be
+exhaustively partitioned between SFT and evaluation.
 
 ## Fact and example identity
 
@@ -23,21 +46,10 @@ An atomic fact is identified within a world by:
 person_id + relation_id
 ```
 
-Its complete definition is:
-
-```text
-person_id + relation_id + fact_value
-```
-
-For example:
-
-```text
-person_0001 + residence_city + Saint-Tula
-```
-
-`fact_id` remains the same when this fact is rendered with different
-templates. `example_id` additionally contains `world_id` and `template_id`, so
-every fact/template realization is distinct.
+Its complete definition is `person_id + relation_id + fact_value`.
+`fact_id` remains the same across renderings. `example_id` contains `world_id`,
+`split`, `fact_id`, and `template_id`, so the intentional exact-recall copy is
+still a distinct evaluation record.
 
 ## Record schema
 
@@ -70,8 +82,10 @@ Seed `30072026` with 500 people produces:
 
 | Split | Birth city | Birth date | Residence | Occupation | Total |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| train | 2,500 | 2,500 | 2,000 | 2,000 | 9,000 |
-| test | 1,000 | 1,000 | 1,000 | 1,000 | 4,000 |
+| train | 1,500 | 1,500 | 1,500 | 1,500 | 6,000 |
+| eval exact recall | 250 | 250 | 250 | 250 | 1,000 |
+| eval seen-family/new-template | 250 | 250 | 250 | 250 | 1,000 |
+| eval held-out family | 250 | 250 | 250 | 250 | 1,000 |
 
 The generated files are stored in:
 
@@ -80,7 +94,7 @@ data/generated/h1/seed_30072026/
 ├── metadata.json
 ├── world.json
 ├── train.jsonl
-└── test.jsonl
+└── test.jsonl   # all three evaluation slices, distinguished by `split`
 ```
 
 ## Reproduction and validation
@@ -101,7 +115,8 @@ python3 scripts/validate_h1_dataset.py \
   data/generated/h1/seed_30072026
 ```
 
-Validation checks the exact Cartesian product, record schema, unique example
-IDs, consistent fact definitions, equal fact coverage between train and test,
-the global family holdout, world reproducibility, metadata counts, and hashes
-of every source file.
+Validation reconstructs the deterministic SFT and paired evaluation rows. It
+checks record identity, consistent fact definitions, equal fact coverage across
+the three evaluation slices, exact-recall membership in SFT, global exclusion
+of seen-family eval template IDs from SFT, the held-out family, world
+reproducibility, metadata counts, and hashes of every source file.

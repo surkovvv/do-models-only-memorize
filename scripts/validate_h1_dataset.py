@@ -58,7 +58,12 @@ def validate_dataset(dataset_dir: Path) -> list[str]:
         "fact_count",
         "train_family_ids",
         "test_family_ids",
+        "sft_template_suffix",
+        "seen_family_eval_template_suffix",
+        "evaluation_people_count",
+        "evaluation_sample_seed",
         "counts",
+        "counts_by_split",
         "counts_by_operation",
         "input_sha256",
     }
@@ -95,6 +100,14 @@ def validate_dataset(dataset_dir: Path) -> list[str]:
         errors.append("metadata train families differ from current H1 manifest")
     if sorted(test_family_ids) != metadata["test_family_ids"]:
         errors.append("metadata test families differ from current H1 manifest")
+    for field in (
+        "sft_template_suffix",
+        "seen_family_eval_template_suffix",
+        "evaluation_people_count",
+        "evaluation_sample_seed",
+    ):
+        if metadata[field] != manifest[field]:
+            errors.append(f"metadata {field} differs from current H1 manifest")
 
     train_records, train_errors = read_jsonl(train_path)
     test_records, test_errors = read_jsonl(test_path)
@@ -106,6 +119,11 @@ def validate_dataset(dataset_dir: Path) -> list[str]:
             test_records,
             train_family_ids=train_family_ids,
             test_family_ids=test_family_ids,
+            sft_template_suffix=str(manifest["sft_template_suffix"]),
+            seen_family_eval_template_suffix=str(
+                manifest["seen_family_eval_template_suffix"]
+            ),
+            evaluation_people_count=int(manifest["evaluation_people_count"]),
         )
     )
 
@@ -114,6 +132,12 @@ def validate_dataset(dataset_dir: Path) -> list[str]:
         template_records,
         train_family_ids=train_family_ids,
         test_family_ids=test_family_ids,
+        sft_template_suffix=str(manifest["sft_template_suffix"]),
+        seen_family_eval_template_suffix=str(
+            manifest["seen_family_eval_template_suffix"]
+        ),
+        evaluation_people_count=int(manifest["evaluation_people_count"]),
+        evaluation_sample_seed=str(manifest["evaluation_sample_seed"]),
     )
     expected_train_records = [example.to_dict() for example in expected_train]
     expected_test_records = [example.to_dict() for example in expected_test]
@@ -129,13 +153,20 @@ def validate_dataset(dataset_dir: Path) -> list[str]:
     }
     if metadata["counts"] != expected_counts:
         errors.append("metadata counts do not match generated examples")
+    expected_counts_by_split: dict[str, int] = {}
+    for example in (*expected_train, *expected_test):
+        expected_counts_by_split[example.split] = (
+            expected_counts_by_split.get(example.split, 0) + 1
+        )
+    if metadata["counts_by_split"] != dict(sorted(expected_counts_by_split.items())):
+        errors.append("metadata split counts do not match generated examples")
     expected_operation_counts = counts_by_operation(expected_train, expected_test)
     if metadata["counts_by_operation"] != expected_operation_counts:
         errors.append("metadata operation counts do not match generated examples")
     if metadata["input_sha256"] != input_hashes(ROOT, DEFAULT_SPLIT_PATH):
         errors.append("metadata input hashes differ from current source files")
-    if metadata["schema_version"] != 1:
-        errors.append("metadata schema_version must be 1")
+    if metadata["schema_version"] != 2:
+        errors.append("metadata schema_version must be 2")
     if metadata["hypothesis"] != "H1":
         errors.append("metadata hypothesis must be H1")
     if metadata["dataset_id"] != f"h1_{world.id}":
@@ -163,9 +194,9 @@ def main() -> int:
         (args.dataset_dir / "metadata.json").read_text(encoding="utf-8")
     )
     print(
-        f"Validated {metadata['counts']['train']} train and "
-        f"{metadata['counts']['test']} test examples: no family leakage, "
-        "all facts and fact/template pairs accounted for."
+        f"Validated {metadata['counts']['train']} SFT and "
+        f"{metadata['counts']['test']} evaluation examples across three slices: "
+        "no family or template leakage."
     )
     return 0
 

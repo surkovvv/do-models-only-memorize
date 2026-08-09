@@ -5,3 +5,4 @@
 {"operation_id":"GET_BIRTH_DATE","template_family_id":"imperative","template_id":"birth_date_imperative_001","answer_format_id":"canonical_value","template":"State the date when {person} came into the world."}
 {"operation_id":"GET_BIRTH_DATE","template_family_id":"imperative","template_id":"birth_date_imperative_002","answer_format_id":"canonical_value","template":"Give the date on which {person} was born."}
 {"operation_id":"GET_BIRTH_DATE","template_family_id":"profile_field","template_id":"birth_date_field_001","answer_format_id":"canonical_value","template":"Fill the blank with the value only: {person} — Date of birth: ____."}
+{"operation_id":"GET_BIRTH_DATE","template_family_id":"profile_field","template_id":"birth_date_field_002","answer_format_id":"canonical_value","template":"Complete the profile field with the value only: {person} — Birth date: ____."}
