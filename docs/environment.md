@@ -67,6 +67,26 @@ bound explicitly:
 uv run python scripts/sft_smoke.py training.smoke_steps=null training.epochs=1
 ```
 
+Complete epoch runs evaluate generated-answer exact match on the full train
+and test files before optimization (`epoch=0`) and after every epoch. Evaluation
+is batched independently from training; configure it with
+`evaluation.batch_size`:
+
+```bash
+uv run python scripts/sft_smoke.py \
+  training.smoke_steps=null \
+  training.epochs=5 \
+  evaluation.batch_size=64
+```
+
+Smoke runs retain their fixed-batch per-step evaluation and do not scan the
+full train/test datasets.
+
+Set `runtime.output_dir` to persist a resolved config, JSONL metrics,
+environment metadata, final predictions, and (by default) a reloadable model.
+For disposable smoke runs, `runtime.save_model=false` keeps the small diagnostic
+artifacts without writing a full checkpoint.
+
 Unknown keys, incompatible types, and invalid numeric values fail before model
 loading. Enable `tracking.enabled` to create a distinct ClearML task and connect
 the resolved configuration as editable task parameters. For a first local run,

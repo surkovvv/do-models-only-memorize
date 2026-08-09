@@ -14,6 +14,7 @@ htmlcov/
 # Secrets and local configuration.
 .env
 clearml.conf
+.private/
 
 # Local experiment output. Keep curated files under data/generated tracked.
 .cache/
