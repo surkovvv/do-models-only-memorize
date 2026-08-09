@@ -2,9 +2,12 @@ experiment_name: h1-sft-smoke
 
 data:
   train_path: data/generated/h1/seed_30072026/train.jsonl
+  test_path: data/generated/h1/seed_30072026/test.jsonl
 
 model:
   name_or_path: .models/Qwen3-0.6B
+  # Pin remote/model-registry sources. Local mounted paths ignore this value.
+  revision: c1899de289a04d12100db370d81485cdf75e47ca
   local_files_only: true
 
 training:
@@ -15,6 +18,13 @@ training:
   epochs: 1
   # Also controls smoke-batch sampling; change it to select another fixed batch.
   seed: 42
+  # Use bf16 on CUDA jobs; fp32 remains the portable local default.
+  precision: fp32
+
+evaluation:
+  # Full training runs generate answers in bounded batches before optimization
+  # and after every epoch. Smoke runs keep their existing fixed-batch eval.
+  batch_size: 64
 
 runtime:
   # "auto" selects CUDA, then MPS, then CPU. An explicit torch device also works.
@@ -22,10 +32,19 @@ runtime:
   debug: false
   # null logs the entire smoke batch after each step; use 1 for compact output.
   prediction_log_limit: null
+  # When set, write resolved config, metrics, environment, predictions and model.
+  output_dir: null
+  # Disable for cheap smoke runs that only need metrics and predictions.
+  save_model: true
 
 tracking:
   enabled: false
   project_name: do-models-only-memorize
+  # Optional exact ClearML project ID; when set, its server-side name is resolved first.
+  project_id: null
   task_name: null  # Defaults to experiment_name.
-  output_uri: null
+  # False keeps artifacts in MLC and avoids requiring the project's S3 credentials.
+  output_uri: false
+  # Loss/token accuracy use this interval; smoke answer exact-match follows it too.
+  log_interval_steps: 1
   tags: [sft, smoke]

@@ -14,10 +14,13 @@ class DataConfig:
     """Input data used by the experiment."""
 
     train_path: str = "data/generated/h1/seed_30072026/train.jsonl"
+    test_path: str = "data/generated/h1/seed_30072026/test.jsonl"
 
     def __post_init__(self) -> None:
         if not self.train_path:
             raise ValueError("data.train_path must not be empty")
+        if not self.test_path:
+            raise ValueError("data.test_path must not be empty")
 
 
 @dataclass(slots=True)
@@ -25,6 +28,7 @@ class ModelConfig:
     """Model and tokenizer source."""
 
     name_or_path: str = ".models/Qwen3-0.6B"
+    revision: str | None = None
     local_files_only: bool = True
 
     def __post_init__(self) -> None:
@@ -41,6 +45,7 @@ class TrainingConfig:
     smoke_steps: int | None = 10
     epochs: int = 1
     seed: int = 42
+    precision: str = "fp32"
 
     def __post_init__(self) -> None:
         if self.batch_size <= 0:
@@ -51,6 +56,19 @@ class TrainingConfig:
             raise ValueError("training.smoke_steps must be positive or null")
         if self.epochs <= 0:
             raise ValueError("training.epochs must be positive")
+        if self.precision not in {"fp32", "bf16"}:
+            raise ValueError("training.precision must be one of: fp32, bf16")
+
+
+@dataclass(slots=True)
+class EvaluationConfig:
+    """Parameters for generated-answer evaluation."""
+
+    batch_size: int = 64
+
+    def __post_init__(self) -> None:
+        if self.batch_size <= 0:
+            raise ValueError("evaluation.batch_size must be positive")
 
 
 @dataclass(slots=True)
@@ -60,12 +78,16 @@ class RuntimeConfig:
     device: str = "auto"
     debug: bool = False
     prediction_log_limit: int | None = None
+    output_dir: str | None = None
+    save_model: bool = True
 
     def __post_init__(self) -> None:
         if not self.device:
             raise ValueError("runtime.device must not be empty")
         if self.prediction_log_limit is not None and self.prediction_log_limit <= 0:
             raise ValueError("runtime.prediction_log_limit must be positive or null")
+        if self.output_dir is not None and not self.output_dir:
+            raise ValueError("runtime.output_dir must be non-empty or null")
 
 
 @dataclass(slots=True)
@@ -74,13 +96,19 @@ class TrackingConfig:
 
     enabled: bool = False
     project_name: str = "do-models-only-memorize"
+    project_id: str | None = None
     task_name: str | None = None
-    output_uri: str | None = None
+    output_uri: str | bool | None = False
+    log_interval_steps: int = 1
     tags: list[str] = field(default_factory=lambda: ["sft", "smoke"])
 
     def __post_init__(self) -> None:
-        if self.enabled and not self.project_name:
-            raise ValueError("tracking.project_name must not be empty when tracking is enabled")
+        if self.enabled and not self.project_name and not self.project_id:
+            raise ValueError(
+                "tracking.project_name or tracking.project_id must be set when tracking is enabled"
+            )
+        if self.log_interval_steps <= 0:
+            raise ValueError("tracking.log_interval_steps must be positive")
 
 
 @dataclass(slots=True)
@@ -91,6 +119,7 @@ class ExperimentConfig:
     data: DataConfig = field(default_factory=DataConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     training: TrainingConfig = field(default_factory=TrainingConfig)
+    evaluation: EvaluationConfig = field(default_factory=EvaluationConfig)
     runtime: RuntimeConfig = field(default_factory=RuntimeConfig)
     tracking: TrackingConfig = field(default_factory=TrackingConfig)
 
