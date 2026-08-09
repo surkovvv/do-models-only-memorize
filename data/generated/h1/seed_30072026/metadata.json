@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "dataset_id": "h1_world_4048c2780968",
   "hypothesis": "H1",
   "world_id": "world_4048c2780968",
@@ -14,23 +14,45 @@
   "test_family_ids": [
     "nominal_attribute"
   ],
+  "sft_template_suffix": "_001",
+  "seen_family_eval_template_suffix": "_002",
+  "evaluation_people_count": 250,
+  "evaluation_sample_seed": "h1-eval-001",
   "counts": {
-    "train": 9000,
-    "test": 4000,
-    "total": 13000
+    "train": 6000,
+    "test": 3000,
+    "total": 9000
+  },
+  "counts_by_split": {
+    "eval_exact_recall": 1000,
+    "eval_heldout_family": 1000,
+    "eval_seen_family_new_template": 1000,
+    "train": 6000
   },
   "counts_by_operation": {
-    "train": {
-      "GET_BIRTH_CITY": 2500,
-      "GET_BIRTH_DATE": 2500,
-      "GET_OCCUPATION": 2000,
-      "GET_RESIDENCE_CITY": 2000
+    "eval_exact_recall": {
+      "GET_BIRTH_CITY": 250,
+      "GET_BIRTH_DATE": 250,
+      "GET_OCCUPATION": 250,
+      "GET_RESIDENCE_CITY": 250
     },
-    "test": {
-      "GET_BIRTH_CITY": 1000,
-      "GET_BIRTH_DATE": 1000,
-      "GET_OCCUPATION": 1000,
-      "GET_RESIDENCE_CITY": 1000
+    "eval_heldout_family": {
+      "GET_BIRTH_CITY": 250,
+      "GET_BIRTH_DATE": 250,
+      "GET_OCCUPATION": 250,
+      "GET_RESIDENCE_CITY": 250
+    },
+    "eval_seen_family_new_template": {
+      "GET_BIRTH_CITY": 250,
+      "GET_BIRTH_DATE": 250,
+      "GET_OCCUPATION": 250,
+      "GET_RESIDENCE_CITY": 250
+    },
+    "train": {
+      "GET_BIRTH_CITY": 1500,
+      "GET_BIRTH_DATE": 1500,
+      "GET_OCCUPATION": 1500,
+      "GET_RESIDENCE_CITY": 1500
     }
   },
   "input_sha256": {
@@ -38,10 +60,10 @@
     "data/dates.txt": "b3fc78f82d8f9f93e42a6884632934125bdc576ddbb46d26ade618f11c1e1a61",
     "data/professions.txt": "5c6ae53cdb79fe0285cf889ce92a7460342eba0f02a5848baa7a724c5b777294",
     "data/towns.txt": "bef0d153e3b30c37fc1ed5b1ca99331386fef0b97207f101cf26150cd39451a0",
-    "data/templates/born_in_city.jsonl": "d11bda9a48a2d4d0b32d4eaec6004556fa6f9ebaad5d490c5635ead1914dfc81",
-    "data/templates/born_in_date.jsonl": "2a019faf80a6066e97f9b0f9764d68da4a96a03cdeb3752dcef7088d8c30f75f",
-    "data/templates/lives_in_city.jsonl": "cea1eb36c5088eb6e27f7af678ac8c5406f171116814b0a4367100ce899fc5db",
-    "data/templates/profession.jsonl": "e527b3bd3376e3372a1f693ee6dbcd8b8c1fd12547c3868da4c415361142902e",
-    "data/splits/h1_template_families.json": "fbcb81122944074bcc7e12321b90859e28892905722d760a1ff24fc3185abe94"
+    "data/templates/born_in_city.jsonl": "73e68153cf85cc7d994d3839dbcefec947af725d487ef0e414ed7269b15fd94a",
+    "data/templates/born_in_date.jsonl": "a81f0067c0a05244585ca58be4c35f960b82552e246078544c9feac297098239",
+    "data/templates/lives_in_city.jsonl": "1a00c23b5d41d5c874e1ca90db70a0ace6f4c6978931161cc32c31ba5066cf16",
+    "data/templates/profession.jsonl": "c8bda36d201d275589f04d20ed772e1710fee7868f711a484ee6b55fd96bee19",
+    "data/splits/h1_template_families.json": "41b891fc6c43a5a205e500e6c2aa8954c3781362af6ecf29deefa6df339ce925"
   }
 }

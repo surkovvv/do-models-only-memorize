@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 
 
@@ -56,6 +57,12 @@ def main() -> int:
         template_records,
         train_family_ids=train_family_ids,
         test_family_ids=test_family_ids,
+        sft_template_suffix=str(manifest["sft_template_suffix"]),
+        seen_family_eval_template_suffix=str(
+            manifest["seen_family_eval_template_suffix"]
+        ),
+        evaluation_people_count=int(manifest["evaluation_people_count"]),
+        evaluation_sample_seed=str(manifest["evaluation_sample_seed"]),
     )
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -67,7 +74,7 @@ def main() -> int:
     write_jsonl(args.output_dir / "test.jsonl", test)
 
     metadata = {
-        "schema_version": 1,
+        "schema_version": 2,
         "dataset_id": f"h1_{world.id}",
         "hypothesis": "H1",
         "world_id": world.id,
@@ -76,11 +83,20 @@ def main() -> int:
         "fact_count": len(world.facts),
         "train_family_ids": sorted(train_family_ids),
         "test_family_ids": sorted(test_family_ids),
+        "sft_template_suffix": manifest["sft_template_suffix"],
+        "seen_family_eval_template_suffix": manifest[
+            "seen_family_eval_template_suffix"
+        ],
+        "evaluation_people_count": manifest["evaluation_people_count"],
+        "evaluation_sample_seed": manifest["evaluation_sample_seed"],
         "counts": {
             "train": len(train),
             "test": len(test),
             "total": len(train) + len(test),
         },
+        "counts_by_split": dict(
+            sorted(Counter(example.split for example in (*train, *test)).items())
+        ),
         "counts_by_operation": counts_by_operation(train, test),
         "input_sha256": input_hashes(ROOT, args.split_manifest),
     }

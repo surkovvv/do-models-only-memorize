@@ -2,6 +2,7 @@ experiment_name: h1-sft-smoke
 
 data:
   train_path: data/generated/h1/seed_30072026/train.jsonl
+  # Contains exact-recall, seen-family/new-template, and held-out-family slices.
   test_path: data/generated/h1/seed_30072026/test.jsonl
 
 model:

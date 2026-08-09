@@ -5,3 +5,4 @@
 {"operation_id":"GET_BIRTH_CITY","template_family_id":"imperative","template_id":"birth_city_imperative_001","answer_format_id":"canonical_value","template":"Name the city where {person} came into the world."}
 {"operation_id":"GET_BIRTH_CITY","template_family_id":"imperative","template_id":"birth_city_imperative_002","answer_format_id":"canonical_value","template":"Identify the city in which {person} was born."}
 {"operation_id":"GET_BIRTH_CITY","template_family_id":"profile_field","template_id":"birth_city_field_001","answer_format_id":"canonical_value","template":"Fill the blank with the value only: {person} — City of birth: ____."}
+{"operation_id":"GET_BIRTH_CITY","template_family_id":"profile_field","template_id":"birth_city_field_002","answer_format_id":"canonical_value","template":"Complete the profile field with the value only: {person} — Birth city: ____."}

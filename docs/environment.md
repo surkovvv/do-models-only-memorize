@@ -67,10 +67,11 @@ bound explicitly:
 uv run python scripts/sft_smoke.py training.smoke_steps=null training.epochs=1
 ```
 
-Complete epoch runs evaluate generated-answer exact match on the full train
-and test files before optimization (`epoch=0`) and after every epoch. Evaluation
-is batched independently from training; configure it with
-`evaluation.batch_size`:
+Complete epoch runs read the combined test file and evaluate generated-answer
+exact match separately on `eval_exact_recall`,
+`eval_seen_family_new_template`, and `eval_heldout_family` before optimization
+(`epoch=0`) and after every epoch. Evaluation is batched independently from
+training; configure it with `evaluation.batch_size`:
 
 ```bash
 uv run python scripts/sft_smoke.py \
@@ -80,7 +81,7 @@ uv run python scripts/sft_smoke.py \
 ```
 
 Smoke runs retain their fixed-batch per-step evaluation and do not scan the
-full train/test datasets.
+three evaluation slices.
 
 Set `runtime.output_dir` to persist a resolved config, JSONL metrics,
 environment metadata, final predictions, and (by default) a reloadable model.

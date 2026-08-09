@@ -3,4 +3,6 @@
 {"operation_id":"GET_OCCUPATION","template_family_id":"nominal_attribute","template_id":"occupation_nominal_001","answer_format_id":"canonical_value","template":"What is {person}'s occupation?"}
 {"operation_id":"GET_OCCUPATION","template_family_id":"nominal_attribute","template_id":"occupation_nominal_002","answer_format_id":"canonical_value","template":"Which profession is listed for {person}?"}
 {"operation_id":"GET_OCCUPATION","template_family_id":"imperative","template_id":"occupation_imperative_001","answer_format_id":"canonical_value","template":"Name {person}'s profession."}
+{"operation_id":"GET_OCCUPATION","template_family_id":"imperative","template_id":"occupation_imperative_002","answer_format_id":"canonical_value","template":"Identify the profession practiced by {person}."}
 {"operation_id":"GET_OCCUPATION","template_family_id":"profile_field","template_id":"occupation_field_001","answer_format_id":"canonical_value","template":"Fill the blank with the value only: {person} — Occupation: ____."}
+{"operation_id":"GET_OCCUPATION","template_family_id":"profile_field","template_id":"occupation_field_002","answer_format_id":"canonical_value","template":"Complete the profile field with the value only: {person} — Profession: ____."}

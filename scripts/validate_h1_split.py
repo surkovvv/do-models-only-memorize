@@ -15,17 +15,17 @@ from validate_templates import TEMPLATE_DIR, TEMPLATE_FILES, load_jsonl
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SPLIT_PATH = ROOT / "data" / "splits" / "h1_template_families.json"
-TARGET_COUNTS = {
-    5: (4, 1),
-    6: (4, 2),
-    7: (5, 2),
-}
+TARGET_COUNTS = {8: (6, 2)}
 REQUIRED_MANIFEST_FIELDS = {
     "schema_version",
     "hypothesis",
     "split_unit",
     "train_family_ids",
     "test_family_ids",
+    "sft_template_suffix",
+    "seen_family_eval_template_suffix",
+    "evaluation_people_count",
+    "evaluation_sample_seed",
 }
 
 
@@ -72,12 +72,29 @@ def validate_h1_split(
             details.append(f"extra={sorted(extra)}")
         return [], [f"manifest schema mismatch ({', '.join(details)})"]
 
-    if manifest["schema_version"] != 1:
-        errors.append("schema_version must be 1")
+    if manifest["schema_version"] != 2:
+        errors.append("schema_version must be 2")
     if manifest["hypothesis"] != "H1":
         errors.append("hypothesis must be 'H1'")
-    if manifest["split_unit"] != "template_family_id":
-        errors.append("split_unit must be 'template_family_id'")
+    if manifest["split_unit"] != "template_family_id_and_template_id":
+        errors.append("split_unit must be 'template_family_id_and_template_id'")
+
+    sft_suffix = _non_empty_string(
+        manifest["sft_template_suffix"], "sft_template_suffix", errors
+    )
+    seen_eval_suffix = _non_empty_string(
+        manifest["seen_family_eval_template_suffix"],
+        "seen_family_eval_template_suffix",
+        errors,
+    )
+    if sft_suffix == seen_eval_suffix:
+        errors.append("SFT and seen-family eval template suffixes must differ")
+    evaluation_people_count = manifest["evaluation_people_count"]
+    if not isinstance(evaluation_people_count, int) or evaluation_people_count <= 0:
+        errors.append("evaluation_people_count must be a positive integer")
+    _non_empty_string(
+        manifest["evaluation_sample_seed"], "evaluation_sample_seed", errors
+    )
 
     train_families = _string_set(
         manifest["train_family_ids"], "train_family_ids", errors
@@ -162,6 +179,31 @@ def validate_h1_split(
                 f"{expected[1]} test, found {train_count} / {test_count}"
             )
 
+        for family_id in train_families:
+            family_records = [
+                record
+                for record in operation_records
+                if record.get("template_family_id") == family_id
+            ]
+            sft_records = [
+                record
+                for record in family_records
+                if isinstance(record.get("template_id"), str)
+                and str(record["template_id"]).endswith(sft_suffix)
+            ]
+            seen_eval_records = [
+                record
+                for record in family_records
+                if isinstance(record.get("template_id"), str)
+                and str(record["template_id"]).endswith(seen_eval_suffix)
+            ]
+            if len(sft_records) != 1 or len(seen_eval_records) != 1:
+                errors.append(
+                    f"{operation_id}/{family_id}: expected one SFT template ending "
+                    f"in {sft_suffix!r} and one seen-family eval template ending "
+                    f"in {seen_eval_suffix!r}"
+                )
+
     return summaries, errors
 
 
@@ -174,6 +216,13 @@ def _string_set(value: object, field: str, errors: list[str]) -> set[str]:
     if len(value) != len(set(value)):
         errors.append(f"{field} contains duplicate values")
     return set(value)
+
+
+def _non_empty_string(value: object, field: str, errors: list[str]) -> str:
+    if not isinstance(value, str) or not value:
+        errors.append(f"{field} must be a non-empty string")
+        return ""
+    return value
 
 
 def main() -> int:

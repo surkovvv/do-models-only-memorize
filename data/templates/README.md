@@ -21,9 +21,8 @@ it changes an interpretable linguistic or presentation property.
 
 Use these curation rules:
 
-- prefer two individual templates per family; one is sufficient for the
-  initial H1 family-level holdout, while a future seen-family/new-template
-  evaluation requires two;
+- keep exactly two individual templates per family so one can be reserved for
+  seen-family/new-template evaluation;
 - keep at most one family for a syntactic, lexical, discourse, or presentation
   construction;
 - reject pairs that differ only by preposition placement, possessive/genitive
@@ -92,10 +91,12 @@ can use one wording and seen-family evaluation can use the other without
 repeating the exact prompt string. For example, pied-piping and preposition
 stranding are both members of `direct_question`, not two families.
 
-The `_001` and `_002` suffixes do not prescribe train/evaluation direction.
-Their assignment must be counterbalanced across worlds or runs. Generated data
-must keep exact-string recall, a new template from a seen family, and a globally
-held-out family as three separate evaluation slices.
+The `_001` and `_002` suffixes do not prescribe a permanent train/evaluation
+direction. The current H1 manifest explicitly assigns `_001` to SFT and `_002`
+to seen-family/new-template evaluation. That assignment must be swapped across
+later worlds or runs for counterbalancing. Generated data keeps exact-string
+recall, a new template from a seen family, and a globally held-out family as
+three separate evaluation slices.
 
 `operation_id` states which fact is requested. `answer_format_id` is
 `canonical_value` for every template: a city, an ISO date, or a profession
@@ -143,5 +144,8 @@ The validator asserts that:
 - train and test family IDs are disjoint;
 - every registry family is assigned exactly once;
 - every template is covered by the split;
-- the per-operation counts are 4/1 for five templates, 4/2 for six templates,
-  and 5/2 for seven templates.
+- every operation has six train-family templates and two held-out-family
+  templates;
+- every train family/operation has one template for the configured SFT suffix
+  and one for the configured seen-family evaluation suffix;
+- the evaluation sample size and deterministic sampling seed are explicit.
