@@ -24,12 +24,34 @@ class ExperimentConfigTests(unittest.TestCase):
         self.assertIsInstance(config, ExperimentConfig)
         self.assertEqual(".models/Qwen3-0.6B", config.model.name_or_path)
         self.assertEqual(16, config.training.batch_size)
+        self.assertEqual(1, config.training.gradient_accumulation_steps)
         self.assertEqual(64, config.evaluation.batch_size)
         self.assertEqual(10, config.training.smoke_steps)
         self.assertIsNone(config.runtime.prediction_log_limit)
         self.assertTrue(config.runtime.save_model)
         self.assertFalse(config.tracking.enabled)
         self.assertEqual(1, config.tracking.log_interval_steps)
+
+    def test_loads_the_full_point_six_billion_pilot_protocol(self) -> None:
+        config = load_experiment_config(ROOT / "configs/h1_full.yaml")
+
+        self.assertEqual("h1-sft-full-pilot", config.experiment_name)
+        self.assertEqual(".models/Qwen3-0.6B", config.model.name_or_path)
+        self.assertIsNone(config.training.smoke_steps)
+        self.assertEqual(16, config.training.batch_size)
+        self.assertEqual(4, config.training.gradient_accumulation_steps)
+        self.assertEqual(5e-5, config.training.learning_rate)
+        self.assertEqual("cosine", config.training.lr_scheduler)
+        self.assertEqual(0.1, config.training.final_learning_rate_ratio)
+        self.assertEqual(0.05, config.training.warmup_ratio)
+        self.assertEqual(20, config.training.warmup_min_steps)
+        self.assertEqual(3, config.training.epochs)
+        self.assertEqual(1024, config.training.max_sequence_length)
+        self.assertEqual("bf16", config.training.precision)
+        self.assertEqual((0.9, 0.95), (config.training.adam_beta1, config.training.adam_beta2))
+        self.assertEqual(0.0, config.training.weight_decay)
+        self.assertEqual(1.0, config.training.max_grad_norm)
+        self.assertTrue(config.tracking.enabled)
 
     def test_applies_typed_command_line_overrides(self) -> None:
         config = load_experiment_config(
@@ -78,6 +100,18 @@ class ExperimentConfigTests(unittest.TestCase):
             load_experiment_config(
                 ROOT / "configs/sft_smoke.yaml",
                 ["evaluation.batch_size=0"],
+            )
+
+        with self.assertRaisesRegex(ValueError, "gradient_accumulation_steps must be positive"):
+            load_experiment_config(
+                ROOT / "configs/sft_smoke.yaml",
+                ["training.gradient_accumulation_steps=0"],
+            )
+
+        with self.assertRaisesRegex(ValueError, "lr_scheduler must be one of"):
+            load_experiment_config(
+                ROOT / "configs/sft_smoke.yaml",
+                ["training.lr_scheduler=linear"],
             )
 
 

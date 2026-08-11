@@ -16,6 +16,7 @@ from dataset import (  # noqa: E402
     EVAL_HELDOUT_FAMILY,
     EVAL_SEEN_FAMILY_NEW_TEMPLATE,
     generate_h1_examples,
+    input_hashes,
     validate_example_records,
 )
 from validate_h1_split import load_manifest, load_registry  # noqa: E402
@@ -144,6 +145,13 @@ class DatasetGenerationTests(unittest.TestCase):
             evaluation_people_count=2,
         )
         self.assertTrue(any("answer differs from fact value" in error for error in errors))
+
+    def test_input_hashes_accepts_relative_or_absolute_manifest_path(self) -> None:
+        relative_path = Path("data/splits/h1_template_families.json")
+        self.assertEqual(
+            input_hashes(ROOT, relative_path),
+            input_hashes(ROOT, ROOT / relative_path),
+        )
 
 
 if __name__ == "__main__":

@@ -4,8 +4,11 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
+from typing import Any, Mapping
 from unittest.mock import Mock, patch
 
 import torch
@@ -15,9 +18,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.sft_smoke import (  # noqa: E402
+    EvaluationLoggers,
     Example,
     StepMetrics,
     TrainingResult,
+    cosine_learning_rate_multiplier,
+    evaluate_splits,
     exact_match_accuracy,
     generate_answers_batched,
     group_evaluation_examples,
@@ -25,6 +31,8 @@ from scripts.sft_smoke import (  # noqa: E402
     make_metric_logger,
     report_final_metrics,
     report_metric_to_clearml,
+    resolve_warmup_steps,
+    save_final_evaluation_summary,
     select_smoke_examples,
     train,
 )
@@ -157,15 +165,19 @@ class SmokeTrainingTests(unittest.TestCase):
         batch = {"input_ids": torch.tensor([[1]])}
         step_metrics = StepMetrics(0.5, 0.75, 4, 2e-5)
         evaluation_splits = {
-            "train": [make_example("train question", "train answer")],
-            "test": [make_example("test question", "test answer")],
+            split: [make_example(f"{split} question", "answer", split=split)]
+            for split in (
+                "eval_exact_recall",
+                "eval_seen_family_new_template",
+                "eval_heldout_family",
+            )
         }
 
         with (
             patch("scripts.sft_smoke.train_step", return_value=step_metrics),
             patch(
-                "scripts.sft_smoke.generate_answers_batched",
-                side_effect=lambda _model, _tokenizer, examples, _device, _batch_size: [
+                "scripts.sft_smoke.generate_answers",
+                side_effect=lambda _model, _tokenizer, examples, _device, **_kwargs: [
                     example.canonical_answer for example in examples
                 ],
             ) as generate,
@@ -185,21 +197,135 @@ class SmokeTrainingTests(unittest.TestCase):
             )
 
         eval_metrics = [metric for metric in result.metrics if metric["mode"] == "eval"]
-        self.assertEqual([0, 0, 1, 1, 2, 2], [metric["epoch"] for metric in eval_metrics])
         self.assertEqual(
-            ["train", "test", "train", "test", "train", "test"],
+            [0, 0, 0, 1, 1, 1, 2, 2, 2],
+            [metric["epoch"] for metric in eval_metrics],
+        )
+        self.assertEqual(
+            [
+                "eval_exact_recall",
+                "eval_seen_family_new_template",
+                "eval_heldout_family",
+            ]
+            * 3,
             [metric["split"] for metric in eval_metrics],
         )
         self.assertTrue(all(metric["exact_match_accuracy"] == 1.0 for metric in eval_metrics))
-        self.assertEqual(6, generate.call_count)
-        self.assertTrue(all(call.args[4] == 3 for call in generate.call_args_list))
+        self.assertEqual(9, generate.call_count)
+        self.assertIsNotNone(result.final_evaluation_summary)
+        assert result.final_evaluation_summary is not None
+        self.assertEqual(
+            {
+                "eval_exact_recall": 1.0,
+                "eval_seen_family_new_template": 1.0,
+                "eval_heldout_family": 1.0,
+            },
+            result.final_evaluation_summary["exact_match_accuracy"],
+        )
+
+    def test_full_training_evaluates_baseline_before_accumulated_optimizer_steps(self) -> None:
+        batches = [{"input_ids": torch.tensor([[index]])} for index in range(5)]
+        evaluation_splits = {
+            split: [make_example(f"{split} question", "answer", split=split)]
+            for split in (
+                "eval_exact_recall",
+                "eval_seen_family_new_template",
+                "eval_heldout_family",
+            )
+        }
+        events: list[str] = []
+
+        def generated_answers(_model, _tokenizer, examples, _device, **_kwargs):
+            events.append("eval")
+            return [example.canonical_answer for example in examples]
+
+        def trained_step(*_args, **_kwargs):
+            events.append("train")
+            return StepMetrics(0.5, 0.75, 4, 5e-5)
+
+        with (
+            patch("scripts.sft_smoke.train_step", side_effect=trained_step) as train_step,
+            patch("scripts.sft_smoke.generate_answers", side_effect=generated_answers),
+        ):
+            result = train(
+                model=Mock(),
+                dataloader=batches,  # type: ignore[arg-type]
+                optimizer=Mock(),
+                device=torch.device("cpu"),
+                epochs=1,
+                smoke_steps=None,
+                tokenizer=Mock(),
+                smoke_examples=None,
+                prediction_log_limit=None,
+                evaluation_splits=evaluation_splits,
+                evaluation_batch_size=8,
+                gradient_accumulation_steps=2,
+            )
+
+        self.assertEqual(["eval", "eval", "eval", "train"], events[:4])
+        self.assertEqual(5, train_step.call_count)
+        self.assertEqual(
+            [2, 2, 2, 2, 1],
+            [call.kwargs["gradient_accumulation_divisor"] for call in train_step.call_args_list],
+        )
+        self.assertEqual(
+            [True, False, True, False, True],
+            [call.kwargs["zero_grad"] for call in train_step.call_args_list],
+        )
+        self.assertEqual(
+            [False, True, False, True, True],
+            [call.kwargs["perform_optimizer_step"] for call in train_step.call_args_list],
+        )
+        train_metrics = [metric for metric in result.metrics if metric["mode"] == "train"]
+        self.assertEqual([1, 2, 3], [metric["step"] for metric in train_metrics])
+        final_eval_metrics = [
+            metric
+            for metric in result.metrics
+            if metric["mode"] == "eval" and metric["epoch"] == 1
+        ]
+        self.assertTrue(all(metric["step"] == 3 for metric in final_eval_metrics))
+
+    def test_point_six_billion_schedule_has_twenty_warmup_steps_and_ten_percent_floor(
+        self,
+    ) -> None:
+        total_steps = 282
+        warmup_steps = resolve_warmup_steps(total_steps, 0.05, 20)
+
+        self.assertEqual(20, warmup_steps)
+        self.assertEqual(
+            0.05,
+            cosine_learning_rate_multiplier(
+                0,
+                total_steps=total_steps,
+                warmup_steps=warmup_steps,
+                final_learning_rate_ratio=0.1,
+            ),
+        )
+        self.assertEqual(
+            1.0,
+            cosine_learning_rate_multiplier(
+                19,
+                total_steps=total_steps,
+                warmup_steps=warmup_steps,
+                final_learning_rate_ratio=0.1,
+            ),
+        )
+        self.assertAlmostEqual(
+            0.1,
+            cosine_learning_rate_multiplier(
+                total_steps - 1,
+                total_steps=total_steps,
+                warmup_steps=warmup_steps,
+                final_learning_rate_ratio=0.1,
+            ),
+        )
 
     def test_generated_eval_uses_bounded_batches(self) -> None:
         examples = [make_example(f"q{index}", str(index)) for index in range(5)]
 
         with patch(
             "scripts.sft_smoke.generate_answers",
-            side_effect=lambda _model, _tokenizer, batch, _device: [
+            side_effect=lambda _model, _tokenizer, batch, _device, **_kwargs: [
                 example.canonical_answer for example in batch
             ],
         ) as generate:
@@ -213,6 +339,113 @@ class SmokeTrainingTests(unittest.TestCase):
 
         self.assertEqual(["0", "1", "2", "3", "4"], predictions)
         self.assertEqual([2, 2, 1], [len(call.args[2]) for call in generate.call_args_list])
+
+    def test_eval_persists_full_traces_aggregates_and_paired_gaps(self) -> None:
+        exact = replace(
+            make_example("exact question", "answer", split="eval_exact_recall"),
+            template_family_id="direct_question",
+            template_id="direct_001",
+        )
+        seen = replace(
+            exact,
+            example_id="seen_example",
+            split="eval_seen_family_new_template",
+            rendered_question="seen-family question",
+            template_id="direct_002",
+        )
+        heldout = replace(
+            exact,
+            example_id="heldout_example",
+            split="eval_heldout_family",
+            rendered_question="heldout-family question",
+            template_family_id="nominal_attribute",
+            template_id="nominal_001",
+        )
+        splits = {
+            "eval_exact_recall": [exact],
+            "eval_seen_family_new_template": [seen],
+            "eval_heldout_family": [heldout],
+        }
+        traces: list[Mapping[str, Any]] = []
+        aggregates: list[Mapping[str, Any]] = []
+        pairs: list[Mapping[str, Any]] = []
+        pair_aggregates: list[Mapping[str, Any]] = []
+        summaries: list[Mapping[str, Any]] = []
+        answers = {
+            "eval_exact_recall": " answer\n",
+            "eval_seen_family_new_template": "wrong",
+            "eval_heldout_family": "answer",
+        }
+
+        with (
+            patch(
+                "scripts.sft_smoke.generate_answers",
+                side_effect=lambda _model, _tokenizer, examples, _device, **_kwargs: [
+                    answers[example.split] for example in examples
+                ],
+            ),
+            patch("builtins.print") as print_line,
+        ):
+            result = evaluate_splits(
+                Mock(),
+                Mock(),
+                splits,
+                torch.device("cpu"),
+                batch_size=1,
+                epoch=2,
+                step=17,
+                loggers=EvaluationLoggers(
+                    trace=traces.extend,
+                    aggregate=aggregates.extend,
+                    pair=pairs.extend,
+                    pair_aggregate=pair_aggregates.extend,
+                    summary=summaries.extend,
+                ),
+            )
+
+        self.assertEqual(3, len(traces))
+        self.assertEqual(" answer\n", traces[0]["prediction_raw"])
+        self.assertEqual("answer", traces[0]["prediction_normalized"])
+        self.assertEqual("exact question", traces[0]["rendered_question"])
+        self.assertEqual("direct_001", traces[0]["template_id"])
+        self.assertTrue(traces[0]["exact_match"])
+        self.assertTrue(
+            any(
+                row["group_by"] == "template_id"
+                and row["group_value"] == "direct_002"
+                and row["exact_match_accuracy"] == 0.0
+                for row in aggregates
+            )
+        )
+        exact_to_seen = next(
+            row
+            for row in pairs
+            if row["comparison"] == "exact_recall_minus_seen_family_new_template"
+        )
+        self.assertEqual("left_only", exact_to_seen["transition"])
+        self.assertEqual(1, exact_to_seen["correctness_delta"])
+        overall_gap = next(
+            row
+            for row in pair_aggregates
+            if row["comparison"] == "exact_recall_minus_seen_family_new_template"
+            and row["group_by"] == "overall"
+        )
+        self.assertEqual(1.0, overall_gap["exact_match_gap"])
+        self.assertEqual(
+            {
+                "eval_exact_recall": 1.0,
+                "eval_seen_family_new_template": 0.0,
+                "eval_heldout_family": 1.0,
+            },
+            result.summary["exact_match_accuracy"],
+        )
+        self.assertEqual([result.summary], summaries)
+        self.assertTrue(
+            any(
+                call.args[0].startswith("eval_gap epoch=2 step=17")
+                for call in print_line.call_args_list
+            )
+        )
 
     def test_eval_series_include_the_split_name(self) -> None:
         logger = Mock()
@@ -293,6 +526,58 @@ class SmokeTrainingTests(unittest.TestCase):
         logger.report_single_value.assert_any_call(name="final/loss", value=0.1)
         logger.report_single_value.assert_any_call(name="final/token_accuracy", value=1.0)
         logger.report_single_value.assert_any_call(name="final/exact_match_accuracy", value=0.75)
+
+    def test_reports_all_three_final_eval_scores_and_gaps(self) -> None:
+        logger = Mock()
+        summary: dict[str, Any] = {
+            "mode": "eval_summary",
+            "epoch": 1,
+            "step": 4,
+            "exact_match_accuracy": {
+                "eval_exact_recall": 0.9,
+                "eval_seen_family_new_template": 0.8,
+                "eval_heldout_family": 0.6,
+            },
+            "paired_exact_match_gap": {
+                "exact_recall_minus_seen_family_new_template": 0.1,
+                "seen_family_new_template_minus_heldout_family": 0.2,
+                "exact_recall_minus_heldout_family": 0.3,
+            },
+        }
+        result = TrainingResult(
+            metrics=[{"mode": "eval", "step": 4, "exact_match_accuracy": 0.6}],
+            predictions=None,
+            final_evaluation_summary=summary,
+        )
+
+        report_final_metrics(logger, result)
+
+        for split_name, value in summary["exact_match_accuracy"].items():
+            logger.report_single_value.assert_any_call(
+                name=f"final/{split_name}/exact_match_accuracy",
+                value=value,
+            )
+        logger.report_single_value.assert_any_call(
+            name="final/gap/exact_recall_minus_seen_family_new_template",
+            value=0.1,
+        )
+
+    def test_saves_final_eval_summary_as_readable_json(self) -> None:
+        summary = {
+            "mode": "eval_summary",
+            "epoch": 1,
+            "step": 4,
+            "exact_match_accuracy": {"eval_exact_recall": 1.0},
+            "paired_exact_match_gap": {},
+        }
+        result = TrainingResult([], None, final_evaluation_summary=summary)
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output_dir = Path(temporary_directory)
+            save_final_evaluation_summary(output_dir, result)
+            rendered = (output_dir / "final_summary.json").read_text(encoding="utf-8")
+
+        self.assertIn('"eval_exact_recall": 1.0', rendered)
 
     def test_rejects_an_empty_smoke_dataset(self) -> None:
         with self.assertRaisesRegex(ValueError, "empty dataset"):

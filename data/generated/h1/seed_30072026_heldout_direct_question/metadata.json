@@ -1,0 +1,69 @@
+{
+  "schema_version": 2,
+  "dataset_id": "h1_world_4048c2780968",
+  "hypothesis": "H1",
+  "world_id": "world_4048c2780968",
+  "world_seed": "30072026",
+  "people_count": 500,
+  "fact_count": 2000,
+  "train_family_ids": [
+    "imperative",
+    "nominal_attribute",
+    "profile_field"
+  ],
+  "test_family_ids": [
+    "direct_question"
+  ],
+  "sft_template_suffix": "_001",
+  "seen_family_eval_template_suffix": "_002",
+  "evaluation_people_count": 250,
+  "evaluation_sample_seed": "h1-eval-001",
+  "counts": {
+    "train": 6000,
+    "test": 3000,
+    "total": 9000
+  },
+  "counts_by_split": {
+    "eval_exact_recall": 1000,
+    "eval_heldout_family": 1000,
+    "eval_seen_family_new_template": 1000,
+    "train": 6000
+  },
+  "counts_by_operation": {
+    "eval_exact_recall": {
+      "GET_BIRTH_CITY": 250,
+      "GET_BIRTH_DATE": 250,
+      "GET_OCCUPATION": 250,
+      "GET_RESIDENCE_CITY": 250
+    },
+    "eval_heldout_family": {
+      "GET_BIRTH_CITY": 250,
+      "GET_BIRTH_DATE": 250,
+      "GET_OCCUPATION": 250,
+      "GET_RESIDENCE_CITY": 250
+    },
+    "eval_seen_family_new_template": {
+      "GET_BIRTH_CITY": 250,
+      "GET_BIRTH_DATE": 250,
+      "GET_OCCUPATION": 250,
+      "GET_RESIDENCE_CITY": 250
+    },
+    "train": {
+      "GET_BIRTH_CITY": 1500,
+      "GET_BIRTH_DATE": 1500,
+      "GET_OCCUPATION": 1500,
+      "GET_RESIDENCE_CITY": 1500
+    }
+  },
+  "input_sha256": {
+    "data/strange_names.txt": "acdb454a11897234d3671352ff93e36c03fcb2e89ea8a4170e92ba4437d7f36e",
+    "data/dates.txt": "b3fc78f82d8f9f93e42a6884632934125bdc576ddbb46d26ade618f11c1e1a61",
+    "data/professions.txt": "5c6ae53cdb79fe0285cf889ce92a7460342eba0f02a5848baa7a724c5b777294",
+    "data/towns.txt": "bef0d153e3b30c37fc1ed5b1ca99331386fef0b97207f101cf26150cd39451a0",
+    "data/templates/born_in_city.jsonl": "73e68153cf85cc7d994d3839dbcefec947af725d487ef0e414ed7269b15fd94a",
+    "data/templates/born_in_date.jsonl": "a81f0067c0a05244585ca58be4c35f960b82552e246078544c9feac297098239",
+    "data/templates/lives_in_city.jsonl": "1a00c23b5d41d5c874e1ca90db70a0ace6f4c6978931161cc32c31ba5066cf16",
+    "data/templates/profession.jsonl": "c8bda36d201d275589f04d20ed772e1710fee7868f711a484ee6b55fd96bee19",
+    "data/splits/h1_heldout_direct_question.json": "b94480d4c72599b6147dedf598e36261ac894d68f67f482d26308f93ed669226"
+  }
+}

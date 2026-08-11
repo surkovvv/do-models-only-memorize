@@ -28,7 +28,10 @@ from validate_h1_split import (  # noqa: E402
 from world import WorldGenerator  # noqa: E402
 
 
-def validate_dataset(dataset_dir: Path) -> list[str]:
+def validate_dataset(
+    dataset_dir: Path,
+    split_manifest: Path = DEFAULT_SPLIT_PATH,
+) -> list[str]:
     errors: list[str] = []
     metadata_path = dataset_dir / "metadata.json"
     world_path = dataset_dir / "world.json"
@@ -90,7 +93,7 @@ def validate_dataset(dataset_dir: Path) -> list[str]:
 
     template_records, registry_errors = load_registry()
     errors.extend(registry_errors)
-    manifest = load_manifest()
+    manifest = load_manifest(split_manifest)
     _, split_errors = validate_h1_split(template_records, manifest)
     errors.extend(split_errors)
 
@@ -163,7 +166,7 @@ def validate_dataset(dataset_dir: Path) -> list[str]:
     expected_operation_counts = counts_by_operation(expected_train, expected_test)
     if metadata["counts_by_operation"] != expected_operation_counts:
         errors.append("metadata operation counts do not match generated examples")
-    if metadata["input_sha256"] != input_hashes(ROOT, DEFAULT_SPLIT_PATH):
+    if metadata["input_sha256"] != input_hashes(ROOT, split_manifest):
         errors.append("metadata input hashes differ from current source files")
     if metadata["schema_version"] != 2:
         errors.append("metadata schema_version must be 2")
@@ -182,9 +185,15 @@ def validate_dataset(dataset_dir: Path) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("dataset_dir", type=Path)
+    parser.add_argument(
+        "--split-manifest",
+        type=Path,
+        default=DEFAULT_SPLIT_PATH,
+        help="Manifest used to generate this dataset.",
+    )
     args = parser.parse_args()
 
-    errors = validate_dataset(args.dataset_dir)
+    errors = validate_dataset(args.dataset_dir, args.split_manifest)
     for error in errors:
         print(f"ERROR: {error}")
     if errors:

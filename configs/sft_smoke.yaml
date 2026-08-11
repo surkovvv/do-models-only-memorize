@@ -33,7 +33,8 @@ runtime:
   debug: false
   # null logs the entire smoke batch after each step; use 1 for compact output.
   prediction_log_limit: null
-  # When set, write resolved config, metrics, environment, predictions and model.
+  # Full runs additionally write complete eval traces, grouped/paired metrics,
+  # checkpoint summaries, and a final summary under this directory.
   output_dir: null
   # Disable for cheap smoke runs that only need metrics and predictions.
   save_model: true

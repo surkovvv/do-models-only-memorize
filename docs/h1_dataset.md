@@ -97,6 +97,19 @@ data/generated/h1/seed_30072026/
 └── test.jsonl   # all three evaluation slices, distinguished by `split`
 ```
 
+Two additional held-out-family folds reuse the same world, selected people,
+facts, template direction, and training protocol:
+
+| Dataset directory suffix | Train families | Held-out family |
+| --- | --- | --- |
+| `seed_30072026` | direct question, imperative, profile field | nominal attribute |
+| `seed_30072026_heldout_direct_question` | imperative, nominal attribute, profile field | direct question |
+| `seed_30072026_heldout_profile_field` | direct question, imperative, nominal attribute | profile field |
+
+`scripts/validate_h1_family_folds.py` checks that all folds contain the same
+world and the same complete fact definitions in every evaluation slice. The
+only permitted scientific axis is the template-family assignment.
+
 ## Reproduction and validation
 
 Generate:
@@ -113,6 +126,19 @@ Validate:
 ```bash
 python3 scripts/validate_h1_dataset.py \
   data/generated/h1/seed_30072026
+```
+
+For a non-default fold, pass its manifest explicitly:
+
+```bash
+python3 scripts/validate_h1_dataset.py \
+  data/generated/h1/seed_30072026_heldout_direct_question \
+  --split-manifest data/splits/h1_heldout_direct_question.json
+
+python3 scripts/validate_h1_family_folds.py \
+  data/generated/h1/seed_30072026 \
+  data/generated/h1/seed_30072026_heldout_direct_question \
+  data/generated/h1/seed_30072026_heldout_profile_field
 ```
 
 Validation reconstructs the deterministic SFT and paired evaluation rows. It
