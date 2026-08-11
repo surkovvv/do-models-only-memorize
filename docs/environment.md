@@ -71,7 +71,16 @@ Complete epoch runs read the combined test file and evaluate generated-answer
 exact match separately on `eval_exact_recall`,
 `eval_seen_family_new_template`, and `eval_heldout_family` before optimization
 (`epoch=0`) and after every epoch. Evaluation is batched independently from
-training; configure it with `evaluation.batch_size`:
+training; configure it with `evaluation.batch_size`. Every checkpoint ends with
+compact lines containing the three primary exact-match accuracies and their
+paired gaps:
+
+```text
+eval_em epoch=1 step=94 exact_recall=0.9820 seen_family_new_template=0.9010 heldout_family=0.7340
+eval_gap epoch=1 step=94 template=+0.0810 family=+0.1670 total=+0.2480
+```
+
+Run a complete evaluation with:
 
 ```bash
 uv run python scripts/sft_smoke.py \
@@ -83,8 +92,42 @@ uv run python scripts/sft_smoke.py \
 Smoke runs retain their fixed-batch per-step evaluation and do not scan the
 three evaluation slices.
 
+The default 0.6B full-fine-tuning pilot is ready to run without a parameter
+sweep:
+
+```bash
+uv run python scripts/sft_smoke.py --config configs/h1_full.yaml
+```
+
+It uses a micro-batch of 16 with four accumulation steps (effective batch 64),
+three epochs, BF16 compute, AdamW with betas `(0.9, 0.95)`, no weight decay,
+gradient clipping at `1.0`, and a peak learning rate of `5e-5`. The learning
+rate warms up for 5% of optimizer steps with a minimum of 20, then follows a
+cosine schedule to 10% of peak. Both training and evaluation are capped at a
+sequence length of 1024 tokens.
+
 Set `runtime.output_dir` to persist a resolved config, JSONL metrics,
 environment metadata, final predictions, and (by default) a reloadable model.
+A full run also writes the following auditable evaluation artifacts as each
+checkpoint is evaluated:
+
+| File | Contents |
+| --- | --- |
+| `eval_predictions.jsonl` | Every source field, raw and normalized prediction, normalized target, and exact-match result |
+| `eval_aggregates.jsonl` | Exact match grouped by split, world, entity, operation, family, template ID, and fact value |
+| `eval_pairs.jsonl` | Same-fact comparisons with both questions, both full answers, correctness delta, and transition class |
+| `eval_pair_aggregates.jsonl` | Paired gaps and `both_correct` / `left_only` / `right_only` / `neither_correct` counts |
+| `eval_summaries.jsonl` | The three primary scores and paired gaps for every evaluation checkpoint |
+| `final_summary.json` | The final checkpoint's three scores and paired gaps in readable JSON |
+
+When ClearML tracking is enabled, the three scores and paired gaps are logged
+as separate scalar series and final summary values. Evaluation files are
+attached to the task when `tracking.output_uri` is configured; with
+`output_uri=false`, they remain in `runtime.output_dir` for the surrounding job
+runner to export. If `runtime.output_dir` is null, the three scores are still
+computed and printed, but the trace artifacts are explicitly reported as
+disabled.
+
 For disposable smoke runs, `runtime.save_model=false` keeps the small diagnostic
 artifacts without writing a full checkpoint.
 

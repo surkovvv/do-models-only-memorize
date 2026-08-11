@@ -1,0 +1,17 @@
+{
+  "schema_version": 2,
+  "hypothesis": "H1",
+  "split_unit": "template_family_id_and_template_id",
+  "train_family_ids": [
+    "imperative",
+    "nominal_attribute",
+    "profile_field"
+  ],
+  "test_family_ids": [
+    "direct_question"
+  ],
+  "sft_template_suffix": "_001",
+  "seen_family_eval_template_suffix": "_002",
+  "evaluation_people_count": 250,
+  "evaluation_sample_seed": "h1-eval-001"
+}

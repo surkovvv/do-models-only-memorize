@@ -517,6 +517,8 @@ def counts_by_operation(
 
 
 def input_hashes(root: Path, split_manifest: Path) -> dict[str, str]:
+    if not split_manifest.is_absolute():
+        split_manifest = root / split_manifest
     paths = [
         root / "data" / "strange_names.txt",
         root / "data" / "dates.txt",

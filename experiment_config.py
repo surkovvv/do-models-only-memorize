@@ -42,22 +42,57 @@ class TrainingConfig:
 
     batch_size: int = 16
     learning_rate: float = 2e-5
+    gradient_accumulation_steps: int = 1
     smoke_steps: int | None = 10
     epochs: int = 1
     seed: int = 42
     precision: str = "fp32"
+    max_sequence_length: int | None = None
+    lr_scheduler: str = "constant"
+    final_learning_rate_ratio: float = 1.0
+    warmup_ratio: float = 0.0
+    warmup_min_steps: int = 0
+    adam_beta1: float = 0.9
+    adam_beta2: float = 0.999
+    adam_epsilon: float = 1e-8
+    weight_decay: float = 0.01
+    max_grad_norm: float | None = None
 
     def __post_init__(self) -> None:
         if self.batch_size <= 0:
             raise ValueError("training.batch_size must be positive")
         if self.learning_rate <= 0:
             raise ValueError("training.learning_rate must be positive")
+        if self.gradient_accumulation_steps <= 0:
+            raise ValueError("training.gradient_accumulation_steps must be positive")
         if self.smoke_steps is not None and self.smoke_steps <= 0:
             raise ValueError("training.smoke_steps must be positive or null")
         if self.epochs <= 0:
             raise ValueError("training.epochs must be positive")
         if self.precision not in {"fp32", "bf16"}:
             raise ValueError("training.precision must be one of: fp32, bf16")
+        if self.max_sequence_length is not None and self.max_sequence_length <= 0:
+            raise ValueError("training.max_sequence_length must be positive or null")
+        if self.lr_scheduler not in {"constant", "cosine"}:
+            raise ValueError("training.lr_scheduler must be one of: constant, cosine")
+        if not 0 < self.final_learning_rate_ratio <= 1:
+            raise ValueError(
+                "training.final_learning_rate_ratio must be greater than 0 and at most 1"
+            )
+        if not 0 <= self.warmup_ratio < 1:
+            raise ValueError("training.warmup_ratio must be at least 0 and less than 1")
+        if self.warmup_min_steps < 0:
+            raise ValueError("training.warmup_min_steps must be non-negative")
+        if not 0 < self.adam_beta1 < 1:
+            raise ValueError("training.adam_beta1 must be between 0 and 1")
+        if not 0 < self.adam_beta2 < 1:
+            raise ValueError("training.adam_beta2 must be between 0 and 1")
+        if self.adam_epsilon <= 0:
+            raise ValueError("training.adam_epsilon must be positive")
+        if self.weight_decay < 0:
+            raise ValueError("training.weight_decay must be non-negative")
+        if self.max_grad_norm is not None and self.max_grad_norm <= 0:
+            raise ValueError("training.max_grad_norm must be positive or null")
 
 
 @dataclass(slots=True)
